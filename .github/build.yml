@@ -1,0 +1,48 @@
+name: Build VideoStar Tweak
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Theos
+        run: |
+          git clone --recursive https://github.com/theos/theos.git ~/theos
+          echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+
+      - name: Setup iOS SDK
+        run: |
+          rm -rf ~/theos/sdks
+          git clone --quiet -n --depth=1 --filter=tree:0 https://github.com/theos/sdks.git ~/theos/sdks
+          cd ~/theos/sdks
+          git sparse-checkout set --no-cone iPhoneOS14.5.sdk
+          git checkout
+
+      - name: Build Tweak Package
+        run: |
+          make package FINALPACKAGE=1
+
+      - name: Prepare Artifacts
+        run: |
+          mkdir -p output
+          cp packages/*.deb output/ 2>/dev/null || true
+          find .theos -name "*.dylib" -exec cp {} output/ \; 2>/dev/null || true
+          ls -la output/
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: VideoStarTool-Build
+          path: output/*
+          if-no-files-found: error
