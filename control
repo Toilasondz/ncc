@@ -1,0 +1,9 @@
+Package: com.reverse.videostartool
+Name: VideoStarTool Pro
+Depends: mobilesubstrate (>= 0.9.5000)
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: Tweak VideoStar: Auto nhap da lop thong minh va Thanh cong cu chia Beat Timeline chuyen nghiep.
+Maintainer: ReverseEngineer
+Author: ReverseEngineer
+Section: Tweaks
