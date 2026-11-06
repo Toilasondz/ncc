@@ -35,6 +35,10 @@
 - (instancetype)initWithConfiguration:(PHPickerConfiguration *)configuration;
 @end
 
+@interface NSValue (VideoStarTool_CMTime)
+- (CMTime)CMTimeValue;
+@end
+
 #define VSLOG(fmt, ...) NSLog(@"[VideoStarTool] " fmt, ##__VA_ARGS__)
 
 // ============================================================================
@@ -488,7 +492,13 @@ static BOOL VSIsEligibleMediaLayer(id layerObj) {
         }
 
         if (timeline && [timeline respondsToSelector:@selector(currentTime)]) {
-            CMTime cur = [((NSValue *)[timeline valueForKey:@"currentTime"]) CMTimeValue];
+            CMTime cur = kCMTimeZero;
+            id timeObj = [timeline valueForKey:@"currentTime"];
+            if ([timeObj respondsToSelector:@selector(CMTimeValue)]) {
+                cur = [timeObj CMTimeValue];
+            } else if ([timeObj isKindOfClass:[NSValue class]]) {
+                [(NSValue *)timeObj getValue:&cur];
+            }
             Float64 currentSec = CMTimeGetSeconds(cur);
             Float64 newSec = MAX(0.0, currentSec + delta);
             CMTime newTime = CMTimeMakeWithSeconds(newSec, 600);
